@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "GoldenKey"
-  s.version      = "1.0"
+  s.version      = "1.0.0"
   s.summary      = "CommonCrypto and Security wrapper for iOS"
   
   s.description  = <<-DESC
