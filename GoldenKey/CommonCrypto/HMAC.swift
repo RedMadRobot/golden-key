@@ -62,24 +62,23 @@ public final class HMAC: Digest {
     /// HMAC context.
     private var context = UnsafeMutablePointer<CCHmacContext>.allocate(capacity: 1)
 
-    public init(algorithm: Algorithm, key: Data) {
+    public init<T>(algorithm: Algorithm, key: T) where T: ContiguousBytes {
         self.algorithm = algorithm
-        key.withUnsafeBytes { buffer in
-            CCHmacInit(context, algorithm.rawValue, buffer.baseAddress, key.count)
+        key.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+            CCHmacInit(context, algorithm.rawValue, buffer.baseAddress, buffer.count)
         }
     }
 
     deinit {
-        context.deinitialize(count: 1)
         context.deallocate()
     }
 
-    /// Process some data.
+    /// Process some bytes.
     ///
-    /// - Parameter data: Data to process.
-    public func combine(_ data: Data) {
-        data.withUnsafeBytes {
-            CCHmacUpdate(context, $0.baseAddress, data.count)
+    /// - Parameter bytes: Bytes to process.
+    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
+        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+            CCHmacUpdate(context, buffer.baseAddress, buffer.count)
         }
     }
 
@@ -92,11 +91,14 @@ public final class HMAC: Digest {
         return data
     }
 
-    public static func hash(algorithm: Algorithm, data: Data, key: Data) -> Data {
+    public static func hash<T>(algorithm: Algorithm, data: T, key: T) -> Data where T: ContiguousBytes {
         var bytes = [UInt8](repeating: 0, count: algorithm.digestLength)
-        key.withUnsafeBytes { keyBytes in
-            data.withUnsafeBytes { dataBytes in
-                CCHmac(algorithm.rawValue, keyBytes.baseAddress, key.count, dataBytes.baseAddress, data.count, &bytes)
+        key.withUnsafeBytes { (keyBytes: UnsafeRawBufferPointer) -> Void in
+            data.withUnsafeBytes { (dataBytes: UnsafeRawBufferPointer) -> Void in
+                CCHmac(algorithm.rawValue,
+                       keyBytes.baseAddress, keyBytes.count,
+                       dataBytes.baseAddress, dataBytes.count,
+                       &bytes)
             }
         }
         return Data(bytes)
