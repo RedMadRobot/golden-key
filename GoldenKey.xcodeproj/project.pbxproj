@@ -58,6 +58,7 @@
 		0226FC7C2276D8F5008E60F3 /* CryptorOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptorOptions.swift; sourceTree = "<group>"; };
 		02573DF62268A078004BD894 /* RandomBytes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RandomBytes.swift; sourceTree = "<group>"; };
 		02573DF82268A491004BD894 /* RandomBytesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RandomBytesTests.swift; sourceTree = "<group>"; };
+		02900A7B22A5106400FFD3A9 /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +115,7 @@
 			children = (
 				01EAFFAA21E8C4AD00089590 /* README.md */,
 				01C1E9F6229BF1A0008C65E4 /* GoldenKey.podspec */,
+				02900A7B22A5106400FFD3A9 /* .travis.yml */,
 				01EAFF8421E8C31100089590 /* GoldenKey */,
 				01EAFF8F21E8C31100089590 /* GoldenKeyTests */,
 				01EAFF8321E8C31100089590 /* Products */,
