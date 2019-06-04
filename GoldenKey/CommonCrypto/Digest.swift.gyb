@@ -11,10 +11,11 @@ import CommonCrypto.CommonDigest
 
 public protocol Digest {
 
-    /// Updates the digest with another data chunk. This can be called multiple times. Use this method for streaming digests.
-    /// - parameters:
-    ///     - data: Data chunk to digest.
-    func combine(_ data: Data)
+    /// Updates the digest with another data chunk. This can be called multiple times.
+    /// Use this method for streaming digests.
+    ///
+    /// - Parameters: bytes: Data chunk to digest.
+    func combine<T>(_ bytes: T) where T: ContiguousBytes
 
     /// Return the digest of the data passed to the `combine(_:)` method so far.
     func finalize() -> Data
@@ -47,11 +48,10 @@ public final class ${name}: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters:
-    ///   - data: data to be combined
-    public func combine(_ data: Data) {
-        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
-            _ = CC_${name}_Update(context, buffer.baseAddress, CC_LONG(data.count))
+    /// - Parameters: bytes: Data chunk to digest.
+    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
+        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+            _ = CC_${name}_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
 
@@ -72,12 +72,12 @@ public final class ${name}: Digest {
     /// $ openssl ${name} <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in ${name}.
-    public static func hash(_ data: Data) -> Data {
-        var bytes = [UInt8](repeating: 0, count: Int(CC_${name}_DIGEST_LENGTH))
-        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
-            _ = CC_${name}(buffer.baseAddress, CC_LONG(buffer.count), &bytes)
+    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+        var result = [UInt8](repeating: 0, count: Int(CC_${name}_DIGEST_LENGTH))
+        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+            _ = CC_${name}(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
-        return Data(bytes)
+        return Data(result)
     }
 }
 
