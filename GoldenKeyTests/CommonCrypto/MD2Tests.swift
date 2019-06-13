@@ -1,25 +1,23 @@
 //
-//  SHA256Tests.swift
+//  MD2Tests.swift
 //  GoldenKeyTests
 //
-//  Created by Alexander Ignatev on 11/01/2019.
+//  Created by Alexander Ignatev on 11/06/2019.
 //  Copyright © 2019 RedMadRobot. All rights reserved.
 //
 
 import XCTest
 import GoldenKey
 
-final class SHA256Tests: XCTestCase {
+final class MD2Tests: XCTestCase {
 
     private let bytes: [UInt8] = [
-        240, 218, 85,  158, 165, 156, 237, 104,
-        180, 214, 87,  73,  107, 238, 151, 83,
-        192, 68,  125, 112, 112, 42,  241, 163,
-        81,  199, 87,  114, 38,  217, 119, 35
+        235, 145, 101, 56,  135, 25,  239, 143,
+        204, 182, 39,  223, 13,  220, 80,  19
     ]
 
     func testUpdateAndFinalize() {
-        var hasher1 = SHA256()
+        var hasher1 = MD2()
         hasher1.update(data: Data("hello".utf8))
 
         var hasher2 = hasher1
@@ -33,17 +31,17 @@ final class SHA256Tests: XCTestCase {
     }
 
     func testHash() {
-        let digest = SHA256.hash(data: Data("hello word".utf8))
+        let digest = MD2.hash(data: Data("hello word".utf8))
         XCTAssertEqual(Array(digest), bytes)
     }
 
     func testDigest() {
-        let digest1 = bytes.withUnsafeBytes { SHA256Digest(bufferPointer: $0) }
-        XCTAssertEqual(digest1.map { Array($0) }, bytes)
+        let digest1 = bytes.withUnsafeBytes { MD2Digest(bufferPointer: $0)! }
+        XCTAssertEqual(Array(digest1), bytes)
 
         var bytes = self.bytes
         bytes.append(contentsOf: [21, 32])
-        let digest2 = bytes.withUnsafeBytes { SHA256Digest(bufferPointer: $0) }
+        let digest2 = bytes.withUnsafeBytes { MD2Digest(bufferPointer: $0) }
         XCTAssertNil(digest2)
     }
 
