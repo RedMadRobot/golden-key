@@ -10,17 +10,28 @@ Stream hasher.
 
 ```swift
 let sha = SHA256()
-sha.combine(Data("12".utf8))
-sha.combine(Data("3".utf8))
+sha.update(data: Data("12".utf8))
+sha.update(data: [1, 2])
 
-let hash = sha.finalize()
+let degest = sha.finalize()
 ```
 
 One shot.
 
 ```swift
-let hash2 = SHA256.hash(Data("123".utf8))
+let digest = SHA256.hash(Data("123".utf8))
 ```
+
+All hash functions return type conform to `Digest` protocol .
+You can convert digest to common types like a `Data`, `String` or `[UInt8]`.
+
+```swift
+let data = Data(digest)
+let bytes: [UInt8] = Array(digest)
+let string = String(data: Data(digest), encoding: .utf8)
+```
+
+
 
 ## HMAC
 hash-based message authentication code
