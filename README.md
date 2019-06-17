@@ -23,15 +23,12 @@ let digest = SHA256.hash(Data("123".utf8))
 ```
 
 All hash functions return type conform to `Digest` protocol .
-You can convert digest to common types like a `Data`, `String` or `[UInt8]`.
+You can convert digest to common types like a `Data` and `[UInt8]`.
 
 ```swift
 let data = Data(digest)
 let bytes: [UInt8] = Array(digest)
-let string = String(data: Data(digest), encoding: .utf8)
 ```
-
-
 
 ## HMAC
 hash-based message authentication code
