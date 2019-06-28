@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/1762267/60340408-2676e580-99b4-11e9-8661-c42d4bb7461b.png" alt="GoldenKey">
+</p>
+
 # GoldenKey
 
 Swift wrapper around CommonCrypto and Security frameworks
