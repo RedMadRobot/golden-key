@@ -14,10 +14,10 @@ public protocol Digest {
     /// Updates the digest with another data chunk. This can be called multiple times.
     /// Use this method for streaming digests.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    func combine<T>(_ bytes: T) where T: ContiguousBytes
+    /// - Parameters: bytes: Data chunk to digest. `Data` or `[UInt8]`.
+    func update<T>(data: T) where T: ContiguousBytes
 
-    /// Return the digest of the data passed to the `combine(_:)` method so far.
+    /// Return the digest of the data passed to the `update(data:)` method so far.
     func finalize() -> Data
 }
 %{
@@ -48,9 +48,9 @@ public final class ${name}: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_${name}_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -72,9 +72,9 @@ public final class ${name}: Digest {
     /// $ openssl ${name} <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in ${name}.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_${name}_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_${name}(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)

@@ -75,9 +75,9 @@ public final class HMAC {
 
     /// Process some bytes.
     ///
-    /// - Parameter bytes: Bytes to process.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameter data: Bytes to process. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             CCHmacUpdate(context, buffer.baseAddress, buffer.count)
         }
     }

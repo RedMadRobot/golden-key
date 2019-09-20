@@ -23,7 +23,7 @@ let degest = sha.finalize()
 One shot.
 
 ```swift
-let digest = SHA256.hash(Data("123".utf8))
+let digest = SHA256.hash(data: Data("123".utf8))
 ```
 
 All hash functions return type conform to `Digest` protocol .
@@ -43,8 +43,8 @@ Stream hasher.
 let key = Data("secret_key".utf8)
 let hmac = HMAC(algorithm: .md5, key: key)
 
-hmac.combine(Data("ab".utf8))
-hmac.combine(Data("cd".utf8))
+hmac.update(data: Data("ab".utf8))
+hmac.update(data: Data("cd".utf8))
 let hash = hmac.finalize()
 ```
 

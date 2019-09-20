@@ -14,10 +14,10 @@ public protocol Digest {
     /// Updates the digest with another data chunk. This can be called multiple times.
     /// Use this method for streaming digests.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    func combine<T>(_ bytes: T) where T: ContiguousBytes
+    /// - Parameters: bytes: Data chunk to digest. `Data` or `[UInt8]`.
+    func update<T>(data: T) where T: ContiguousBytes
 
-    /// Return the digest of the data passed to the `combine(_:)` method so far.
+    /// Return the digest of the data passed to the `update(data:)` method so far.
     func finalize() -> Data
 }
     
@@ -37,9 +37,9 @@ public final class MD2: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_MD2_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -61,9 +61,9 @@ public final class MD2: Digest {
     /// $ openssl MD2 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in MD2.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_MD2_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_MD2(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
@@ -86,9 +86,9 @@ public final class MD4: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_MD4_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -110,9 +110,9 @@ public final class MD4: Digest {
     /// $ openssl MD4 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in MD4.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_MD4_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_MD4(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
@@ -135,9 +135,9 @@ public final class MD5: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_MD5_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -159,9 +159,9 @@ public final class MD5: Digest {
     /// $ openssl MD5 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in MD5.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_MD5(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
@@ -184,9 +184,9 @@ public final class SHA1: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA1_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -208,9 +208,9 @@ public final class SHA1: Digest {
     /// $ openssl SHA1 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in SHA1.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA1(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
@@ -233,9 +233,9 @@ public final class SHA224: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA224_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -257,9 +257,9 @@ public final class SHA224: Digest {
     /// $ openssl SHA224 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in SHA224.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_SHA224_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA224(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
@@ -282,9 +282,9 @@ public final class SHA256: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA256_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -306,9 +306,9 @@ public final class SHA256: Digest {
     /// $ openssl SHA256 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in SHA256.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA256(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
@@ -331,9 +331,9 @@ public final class SHA384: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA384_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -355,9 +355,9 @@ public final class SHA384: Digest {
     /// $ openssl SHA384 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in SHA384.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_SHA384_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA384(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
@@ -380,9 +380,9 @@ public final class SHA512: Digest {
     /// Combines data to be hashed.
     /// Can be called repeatedly with chunks of the message.
     ///
-    /// - Parameters: bytes: Data chunk to digest.
-    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+    /// - Parameters: data: Data chunk to digest. `Data` or `[UInt8]`.
+    public func update<T>(data: T) where T: ContiguousBytes {
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA512_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
         }
     }
@@ -404,9 +404,9 @@ public final class SHA512: Digest {
     /// $ openssl SHA512 <<< "string_to_be_hashed"
     ///
     /// - Returns: data digest (cryptographic hash) in SHA512.
-    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+    public static func hash<T>(data: T) -> Data where T: ContiguousBytes {
         var result = [UInt8](repeating: 0, count: Int(CC_SHA512_DIGEST_LENGTH))
-        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+        data.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
             _ = CC_SHA512(buffer.baseAddress, CC_LONG(buffer.count), &result)
         }
         return Data(result)
