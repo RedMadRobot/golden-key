@@ -10,7 +10,7 @@ import Foundation
 import CommonCrypto.CommonHMAC
 
 /// hash-based message authentication code
-public final class HMAC: Digest {
+public final class HMAC {
 
     /// HMAC algorithm.
     public enum Algorithm {
