@@ -1,0 +1,84 @@
+//
+//  CommonDigest.swift
+//  GoldenKey
+//
+//  Created by Alexander Ignatev on 02/01/2019.
+//  Copyright © 2019 Alexander Ignition. All rights reserved.
+//
+
+import Foundation
+import CommonCrypto.CommonDigest
+
+public protocol Digest {
+
+    /// Updates the digest with another data chunk. This can be called multiple times.
+    /// Use this method for streaming digests.
+    ///
+    /// - Parameters: bytes: Data chunk to digest.
+    func combine<T>(_ bytes: T) where T: ContiguousBytes
+
+    /// Return the digest of the data passed to the `combine(_:)` method so far.
+    func finalize() -> Data
+}
+%{
+DIGESTS = [('MD2', 'MD2'),
+           ('MD4', 'MD4'),
+           ('MD5', 'MD5'),
+           ('SHA1', 'SHA1'),
+           ('SHA224', 'SHA256'),
+           ('SHA256', 'SHA256'),
+           ('SHA384', 'SHA512'),
+           ('SHA512', 'SHA512')]
+}%
+    
+% for (name, context) in DIGESTS:
+/// Class for ${name} cryptographic hash generation
+public final class ${name}: Digest {
+    private var context = UnsafeMutablePointer<CC_${context}_CTX>.allocate(capacity: 1)
+
+    /// Initializes a ${name}_CTX structure
+    public init() {
+        CC_${name}_Init(context)
+    }
+
+    deinit {
+        context.deallocate()
+    }
+
+    /// Combines data to be hashed.
+    /// Can be called repeatedly with chunks of the message.
+    ///
+    /// - Parameters: bytes: Data chunk to digest.
+    public func combine<T>(_ bytes: T) where T: ContiguousBytes {
+        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+            _ = CC_${name}_Update(context, buffer.baseAddress, CC_LONG(buffer.count))
+        }
+    }
+
+    /// Computes the ${name} data digest (cryptographic hash).
+    /// Erases the ${name}_CTX structure.
+    ///
+    /// - Returns: data digest (cryptographic hash) in ${name}.
+    public func finalize() -> Data {
+        var data = Data(repeating: 0, count: Int(CC_${name}_DIGEST_LENGTH))
+        data.withUnsafeMutableBytes { (buffer: UnsafeMutableRawBufferPointer) -> Void in
+            _ = CC_${name}_Final(buffer.bindMemory(to: UInt8.self).baseAddress, context)
+        }
+        return data
+    }
+
+    /// Computes the ${name} data digest.
+    /// Command line analog:
+    /// $ openssl ${name} <<< "string_to_be_hashed"
+    ///
+    /// - Returns: data digest (cryptographic hash) in ${name}.
+    public static func hash<T>(_ bytes: T) -> Data where T: ContiguousBytes {
+        var result = [UInt8](repeating: 0, count: Int(CC_${name}_DIGEST_LENGTH))
+        bytes.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) -> Void in
+            _ = CC_${name}(buffer.baseAddress, CC_LONG(buffer.count), &result)
+        }
+        return Data(result)
+    }
+}
+
+% end
