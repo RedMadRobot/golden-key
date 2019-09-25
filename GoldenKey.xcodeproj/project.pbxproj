@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0113AB71233A3A770060801C /* DigestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0113AB70233A3A770060801C /* DigestTests.swift */; };
 		01EAFF8C21E8C31100089590 /* GoldenKey.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01EAFF8221E8C31100089590 /* GoldenKey.framework */; };
 		01EAFF9121E8C31100089590 /* GoldenKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFF9021E8C31100089590 /* GoldenKeyTests.swift */; };
 		01EAFF9D21E8C39800089590 /* SecurityError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFF9C21E8C39800089590 /* SecurityError.swift */; };
@@ -16,7 +17,6 @@
 		01EAFFA521E8C41000089590 /* PBKDF2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFFA421E8C41000089590 /* PBKDF2.swift */; };
 		01EAFFA721E8C44200089590 /* HMAC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFFA621E8C44200089590 /* HMAC.swift */; };
 		01EAFFA921E8C46B00089590 /* Digest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFFA821E8C46B00089590 /* Digest.swift */; };
-		01EAFFAE21E8C5B300089590 /* SHA256Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFFAD21E8C5B300089590 /* SHA256Tests.swift */; };
 		01EAFFB021E8C5CF00089590 /* HMACTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFFAF21E8C5CF00089590 /* HMACTests.swift */; };
 		01EAFFB221E8C5FE00089590 /* PBKDF2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFFB121E8C5FE00089590 /* PBKDF2Tests.swift */; };
 		01EAFFB421E8C62600089590 /* CryptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EAFFB321E8C62600089590 /* CryptorTests.swift */; };
@@ -36,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0113AB70233A3A770060801C /* DigestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DigestTests.swift; sourceTree = "<group>"; };
 		01C1E9F6229BF1A0008C65E4 /* GoldenKey.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; path = GoldenKey.podspec; sourceTree = "<group>"; };
 		01EAFF8221E8C31100089590 /* GoldenKey.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GoldenKey.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		01EAFF8621E8C31100089590 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -51,7 +52,6 @@
 		01EAFFA821E8C46B00089590 /* Digest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Digest.swift; sourceTree = "<group>"; };
 		01EAFFAA21E8C4AD00089590 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		01EAFFAC21E8C57800089590 /* Digest.swift.gyb */ = {isa = PBXFileReference; lastKnownFileType = text; path = Digest.swift.gyb; sourceTree = "<group>"; };
-		01EAFFAD21E8C5B300089590 /* SHA256Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SHA256Tests.swift; sourceTree = "<group>"; };
 		01EAFFAF21E8C5CF00089590 /* HMACTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HMACTests.swift; sourceTree = "<group>"; };
 		01EAFFB121E8C5FE00089590 /* PBKDF2Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PBKDF2Tests.swift; sourceTree = "<group>"; };
 		01EAFFB321E8C62600089590 /* CryptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptorTests.swift; sourceTree = "<group>"; };
@@ -101,7 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				01EAFF9021E8C31100089590 /* GoldenKeyTests.swift */,
-				01EAFFAD21E8C5B300089590 /* SHA256Tests.swift */,
+				0113AB70233A3A770060801C /* DigestTests.swift */,
 				01EAFFAF21E8C5CF00089590 /* HMACTests.swift */,
 				01EAFFB121E8C5FE00089590 /* PBKDF2Tests.swift */,
 				01EAFFB321E8C62600089590 /* CryptorTests.swift */,
@@ -298,9 +298,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				01EAFFB421E8C62600089590 /* CryptorTests.swift in Sources */,
+				0113AB71233A3A770060801C /* DigestTests.swift in Sources */,
 				02573DF92268A491004BD894 /* RandomBytesTests.swift in Sources */,
 				01EAFFB221E8C5FE00089590 /* PBKDF2Tests.swift in Sources */,
-				01EAFFAE21E8C5B300089590 /* SHA256Tests.swift in Sources */,
 				01EAFF9121E8C31100089590 /* GoldenKeyTests.swift in Sources */,
 				01EAFFB021E8C5CF00089590 /* HMACTests.swift in Sources */,
 			);

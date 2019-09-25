@@ -19,6 +19,8 @@ public protocol Digest {
 
     /// Return the digest of the data passed to the `update(data:)` method so far.
     func finalize() -> Data
+
+    static func hash<T>(data: T) -> Data where T: ContiguousBytes
 }
 %{
 DIGESTS = [('MD2', 'MD2'),
