@@ -16,8 +16,8 @@ final class HMACTests: XCTestCase {
             algorithm: .md5,
             key: Data("secret_key".utf8)
         )
-        hmac.combine(Data("ab".utf8))
-        hmac.combine(Data("cd".utf8))
+        hmac.update(data: Data("ab".utf8))
+        hmac.update(data: Data("cd".utf8))
         let hash = hmac.finalize().base64EncodedString()
         XCTAssertEqual(hash, "CHYyx9XVLDvprNC0Mjq8Gw==")
     }
