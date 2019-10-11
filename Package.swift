@@ -22,11 +22,11 @@ let package = Package(
     targets: [
         .target(
             name: "GoldenKey",
-            path: "GoldenKey/CommonCrypto"),
+            path: "GoldenKey"),
         .testTarget(
             name: "GoldenKeyTests",
             dependencies: ["GoldenKey"],
-            path: "GoldenKeyTests/CommonCrypto")
+            path: "GoldenKeyTests")
     ],
     swiftLanguageVersions: [
         .v5
