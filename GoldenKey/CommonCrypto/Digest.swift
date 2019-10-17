@@ -11,6 +11,8 @@ import CommonCrypto.CommonDigest
 
 public protocol Digest {
 
+    init()
+
     /// Updates the digest with another data chunk. This can be called multiple times.
     /// Use this method for streaming digests.
     ///
