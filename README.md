@@ -66,3 +66,110 @@ $ wget https://github.com/apple/swift/raw/master/utils/gyb
 $ wget https://github.com/apple/swift/raw/master/utils/gyb.py
 $ chmod +x gyb
 ```
+
+# Efficient way to calculate hash of a large file
+
+To calculate hash of a large file use `DispatchIO`.
+
+In the example below `DispatchIO` reads a file by chunks and process every chunk by calling update method of `SHA256` class.
+
+The default chunk size is set to 128 MB to limit maximum memory usage.
+
+![Screenshot](./scr.png)
+
+```
+final class FileHash {
+	
+	/// Calculates hash of the file
+	/// - Parameter for: URL of the file
+	/// - Parameter hashFunctionType: Hash function type. SHA256.self for example.
+	/// - Parameter chunkSize: Max memory usage. 128 MB by defailt
+	/// - Parameter completion: Completion handler
+	static func calculateHash(
+		for fileURL: URL,
+		hashFunctionType: Digest.Type,
+		chunkSize: Int = 128 * 1024 * 1024,
+		completionQueue: DispatchQueue = .main,
+		completion: @escaping (Result<Data, POSIXError>) -> Void) throws {
+
+		let hashFunction = hashFunctionType.init()
+
+		let queue = DispatchQueue(
+			label: "read",
+			qos: .userInitiated
+		)
+		
+		let fileDescriptor = try FileHandle(forReadingFrom: fileURL).fileDescriptor
+		
+		let dispatchIO = DispatchIO(
+			type: .stream,
+			fileDescriptor: fileDescriptor,
+			queue: queue,
+			cleanupHandler: { _ in }
+		)
+
+		dispatchIO.setLimit(lowWater: Int.max)
+		
+		func readNextChunk() {
+			dispatchIO.read(offset: 0, length: chunkSize, queue: queue) { (done, data, error) in
+				
+				guard error == 0 else {
+					let error = POSIXError(POSIXErrorCode(rawValue: error)!)
+					dispatchIO.close(flags: .stop)
+					completionQueue.async {
+						completion(.failure(error))
+					}
+					return
+				}
+
+				guard let data = data else { return }
+
+				if data.isEmpty == false {
+					data.regions.forEach { hashFunction.update(data: $0) }
+				}
+
+				if done, data.isEmpty {
+					dispatchIO.close()
+
+					completionQueue.async {
+                        completion(.success(hashFunction.finalize()))
+					}
+				}
+
+				if done, data.isEmpty == false {
+					readNextChunk()
+				}
+			}
+		}
+		
+		readNextChunk()
+	}
+	
+}
+```
+
+## Usage example
+```
+
+extension Data {
+    /// Presents Data in hex format
+    var hexDescription: String {
+        return reduce("") {$0 + String(format: "%02x", $1)}
+    }
+}
+
+let fileURL = URL(string: "absolute_path_to_file")!
+
+do {
+	try FileHash.calculateHash(for: fileURL, hashFunctionType: SHA256.self) { result in
+		switch result {
+		case .success(let hash):
+			print(hash.hexDescription)
+		case .failure(let error):
+			print(error.localizedDescription)
+		}
+	}
+} catch (let error) {
+	print(error.localizedDescription)
+}
+```
