@@ -78,19 +78,27 @@ The default chunk size is set to 128 MB to limit maximum memory usage.
 ![Screenshot](./scr.png)
 
 ```swift
+import Foundation
+import GoldenKey
+
 final class FileHash {
     
-    private let queue = DispatchQueue(
-        label: "read",
-        qos: .userInitiated
-    )
+    private let workQueue: DispatchQueue
     private let dispatchIO: DispatchIO
     
     /// Opens and prepares a file for reading.
     /// - Parameter fileURL: URL of the file.
+    /// - Parameter workQueue: DispatchQueue on which to perform work (read and calculating hash).
     /// - Parameter queue: DispatchQueue of the completion handler.
     /// - Parameter completion: Calls when the file closed. Useful when you want to calculate hash of multiple files sequentially.
-    init(fileURL: URL, queue: DispatchQueue = .main, completion: (() -> Void)? = nil) throws {
+    init(
+        fileURL: URL,
+        workQueue: DispatchQueue = .init(label: "work", qos: .userInitiated),
+        queue: DispatchQueue = .main,
+        completion: (() -> Void)? = nil) throws {
+        
+        self.workQueue = workQueue
+        
         let fileHandle = try FileHandle(forReadingFrom: fileURL)
         
         dispatchIO = DispatchIO(
@@ -108,23 +116,24 @@ final class FileHash {
     /// Calculates hash of the file
     /// - Parameter hashFunctionType: Hash function type. SHA256.self for example.
     /// - Parameter chunkSize: Max memory usage. 128 MB by default.
+    /// - Parameter queue: DispatchQueue of the completion handler.
     /// - Parameter completion: Completion handler.
     func calculateHash(
         hashFunctionType: Digest.Type,
         chunkSize: Int = 128 * 1024 * 1024,
-        completionQueue: DispatchQueue = .main,
+        queue: DispatchQueue = .main,
         completion: @escaping (Result<Data, POSIXError>) -> Void) {
         
         let hashFunction = hashFunctionType.init()
         
         func readNextChunk() {
-            dispatchIO.read(offset: 0, length: chunkSize, queue: queue) { [weak self] (done, data, error) in
+            dispatchIO.read(offset: 0, length: chunkSize, queue: workQueue) { [weak self] (done, data, error) in
                 guard let self = self else { return }
                 
                 guard error == 0 else {
                     let error = POSIXError(POSIXErrorCode(rawValue: error)!)
                     self.dispatchIO.close(flags: .stop)
-                    completionQueue.async {
+                    queue.async {
                         completion(.failure(error))
                     }
                     return
@@ -139,8 +148,9 @@ final class FileHash {
                 if done, data.isEmpty {
                     self.dispatchIO.close()
                     
-                    completionQueue.async {
-                        completion(.success(hashFunction.finalize()))
+                    let digest = hashFunction.finalize()
+                    queue.async {
+                        completion(.success(digest))
                     }
                 }
                 
