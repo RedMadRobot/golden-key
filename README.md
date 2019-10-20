@@ -77,79 +77,87 @@ The default chunk size is set to 128 MB to limit maximum memory usage.
 
 ![Screenshot](./scr.png)
 
-```
+```swift
 final class FileHash {
-	
-	/// Calculates hash of the file
-	/// - Parameter for: URL of the file
-	/// - Parameter hashFunctionType: Hash function type. SHA256.self for example.
-	/// - Parameter chunkSize: Max memory usage. 128 MB by defailt
-	/// - Parameter completion: Completion handler
-	static func calculateHash(
-		for fileURL: URL,
-		hashFunctionType: Digest.Type,
-		chunkSize: Int = 128 * 1024 * 1024,
-		completionQueue: DispatchQueue = .main,
-		completion: @escaping (Result<Data, POSIXError>) -> Void) throws {
-
-		let hashFunction = hashFunctionType.init()
-
-		let queue = DispatchQueue(
-			label: "read",
-			qos: .userInitiated
-		)
-		
-		let fileDescriptor = try FileHandle(forReadingFrom: fileURL).fileDescriptor
-		
-		let dispatchIO = DispatchIO(
-			type: .stream,
-			fileDescriptor: fileDescriptor,
-			queue: queue,
-			cleanupHandler: { _ in }
-		)
-
-		dispatchIO.setLimit(lowWater: Int.max)
-		
-		func readNextChunk() {
-			dispatchIO.read(offset: 0, length: chunkSize, queue: queue) { (done, data, error) in
-				
-				guard error == 0 else {
-					let error = POSIXError(POSIXErrorCode(rawValue: error)!)
-					dispatchIO.close(flags: .stop)
-					completionQueue.async {
-						completion(.failure(error))
-					}
-					return
-				}
-
-				guard let data = data else { return }
-
-				if data.isEmpty == false {
-					data.regions.forEach { hashFunction.update(data: $0) }
-				}
-
-				if done, data.isEmpty {
-					dispatchIO.close()
-
-					completionQueue.async {
+    
+    private let queue = DispatchQueue(
+        label: "read",
+        qos: .userInitiated
+    )
+    private let dispatchIO: DispatchIO
+    
+    /// Opens and prepares a file for reading.
+    /// - Parameter fileURL: URL of the file.
+    /// - Parameter queue: DispatchQueue of the completion handler.
+    /// - Parameter completion: Calls when the file closed. Useful when you want to calculate hash of multiple files sequentially.
+    init(fileURL: URL, queue: DispatchQueue = .main, completion: (() -> Void)? = nil) throws {
+        let fileHandle = try FileHandle(forReadingFrom: fileURL)
+        
+        dispatchIO = DispatchIO(
+            type: .stream,
+            fileDescriptor: fileHandle.fileDescriptor,
+            queue: queue,
+            cleanupHandler: { _ in
+                fileHandle.closeFile()
+                queue.async { completion?() }
+            }
+        )
+        dispatchIO.setLimit(lowWater: Int.max)
+    }
+    
+    /// Calculates hash of the file
+    /// - Parameter hashFunctionType: Hash function type. SHA256.self for example.
+    /// - Parameter chunkSize: Max memory usage. 128 MB by default.
+    /// - Parameter completion: Completion handler.
+    func calculateHash(
+        hashFunctionType: Digest.Type,
+        chunkSize: Int = 128 * 1024 * 1024,
+        completionQueue: DispatchQueue = .main,
+        completion: @escaping (Result<Data, POSIXError>) -> Void) {
+        
+        let hashFunction = hashFunctionType.init()
+        
+        func readNextChunk() {
+            dispatchIO.read(offset: 0, length: chunkSize, queue: queue) { [weak self] (done, data, error) in
+                guard let self = self else { return }
+                
+                guard error == 0 else {
+                    let error = POSIXError(POSIXErrorCode(rawValue: error)!)
+                    self.dispatchIO.close(flags: .stop)
+                    completionQueue.async {
+                        completion(.failure(error))
+                    }
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                if data.isEmpty == false {
+                    data.regions.forEach { hashFunction.update(data: $0) }
+                }
+                
+                if done, data.isEmpty {
+                    self.dispatchIO.close()
+                    
+                    completionQueue.async {
                         completion(.success(hashFunction.finalize()))
-					}
-				}
-
-				if done, data.isEmpty == false {
-					readNextChunk()
-				}
-			}
-		}
-		
-		readNextChunk()
-	}
-	
+                    }
+                }
+                
+                if done, data.isEmpty == false {
+                    readNextChunk()
+                }
+            }
+        }
+        
+        readNextChunk()
+    }
+    
 }
 ```
 
 ## Usage example
-```
+```swift
 
 extension Data {
     /// Presents Data in hex format
@@ -158,18 +166,18 @@ extension Data {
     }
 }
 
-let fileURL = URL(string: "absolute_path_to_file")!
-
 do {
-	try FileHash.calculateHash(for: fileURL, hashFunctionType: SHA256.self) { result in
-		switch result {
-		case .success(let hash):
-			print(hash.hexDescription)
-		case .failure(let error):
-			print(error.localizedDescription)
-		}
-	}
+    let fileURL = URL(string: "absolute_path_to_file")!
+    let fileHash = try FileHash(fileURL: fileURL)
+    fileHash.calculateHash(hashFunctionType: SHA256.self) { result in
+        switch result {
+        case .success(let hash):
+            print(hash.hexDescription)
+        case .failure(let error):
+            print(error.localizedDescription)
+        }
+    }
 } catch (let error) {
-	print(error.localizedDescription)
+    print(error.localizedDescription)
 }
 ```
